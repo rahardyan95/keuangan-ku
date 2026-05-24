@@ -1,0 +1,338 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="Financial Health Dashboard — Kelola pengeluaran dan pemasukan dengan visualisasi interaktif modern. Sinkronisasi langsung ke Google Sheets.">
+  <title>Financial Health Dashboard — Real-time Spending Analysis</title>
+  <link rel="stylesheet" href="css/style.css">
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.7/dist/chart.umd.min.js"></script>
+</head>
+<body>
+  <div class="app-container">
+
+    <!-- ══ Header ══════════════════════════════════════════ -->
+    <header class="header" id="header">
+      <div class="header-brand">
+        <div class="header-logo">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <line x1="18" y1="20" x2="18" y2="10"></line>
+            <line x1="12" y1="20" x2="12" y2="4"></line>
+            <line x1="6" y1="20" x2="6" y2="14"></line>
+          </svg>
+        </div>
+        <div>
+          <div class="header-title">Financial Health Dashboard</div>
+          <div class="header-subtitle">Real-time spending analysis &amp; planning</div>
+        </div>
+      </div>
+      <button class="btn-add-transaction" id="btnAddTransaction">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+          <line x1="12" y1="5" x2="12" y2="19"></line>
+          <line x1="5" y1="12" x2="19" y2="12"></line>
+        </svg>
+        Tambah Transaksi
+      </button>
+    </header>
+
+    <!-- ══ Top Navbar ══════════════════════════════════════ -->
+    <nav class="top-nav" id="topNav">
+      <div class="top-nav-inner">
+        <div class="top-nav-tabs">
+          <button class="top-nav-tab active" data-view="dashboard">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <circle cx="12" cy="12" r="10"></circle>
+              <polyline points="12 6 12 12 16 14"></polyline>
+            </svg>
+            DASHBOARD
+          </button>
+          <button class="top-nav-tab" data-view="data">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+              <polyline points="14 2 14 8 20 8"></polyline>
+            </svg>
+            DATA (Transaksi)
+          </button>
+          <button class="top-nav-tab" data-view="category">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <rect x="3" y="3" width="7" height="7"></rect>
+              <rect x="14" y="3" width="7" height="7"></rect>
+              <rect x="14" y="14" width="7" height="7"></rect>
+              <rect x="3" y="14" width="7" height="7"></rect>
+            </svg>
+            KATEGORI
+          </button>
+        </div>
+      </div>
+    </nav>
+
+    <!-- ══ Main Content ═══════════════════════════════════ -->
+    <main class="main-content">
+
+      <!-- ── Dashboard View ────────────────────────────── -->
+      <section class="view active" id="viewDashboard">
+
+        <!-- Overview Banner -->
+        <div class="overview-banner animate-in">
+          <span class="overview-label">Overview Aplikasi</span>
+          <h1 class="overview-title">Kesehatan Finansial Anda Hari Ini</h1>
+          <p class="overview-desc">Kelola pengeluaran dan pemasukan dengan visualisasi interaktif modern. Data di bawah disinkronisasi langsung dari sheet transaksi.</p>
+        </div>
+
+        <!-- Filter Bar -->
+        <div class="filter-bar animate-in">
+          <div class="filter-bar-left">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <polygon points="22 3 2 3 10 12.46 10 19 14 21 14 12.46 22 3"></polygon>
+            </svg>
+            Filter Dashboard:
+          </div>
+          <div class="filter-bar-right">
+            <select class="filter-select" id="filterCategory">
+              <option value="all">Semua Kategori</option>
+            </select>
+            <select class="filter-select" id="filterPeriod">
+              <option value="all">Semua Waktu</option>
+              <option value="this_week">Minggu Ini</option>
+              <option value="this_month">Bulan Ini</option>
+              <option value="last_3_months">3 Bulan Terakhir</option>
+              <option value="this_year">Tahun Ini</option>
+            </select>
+            <button class="btn-reset-filter" id="btnResetFilter">Reset Filter</button>
+          </div>
+        </div>
+
+        <!-- Summary Cards -->
+        <div class="summary-cards" id="summaryCards">
+          <!-- Rendered by JS -->
+        </div>
+
+        <!-- Chart + Recent Transactions -->
+        <div class="two-col">
+          <div class="card animate-in">
+            <div class="card-header">
+              <div>
+                <div class="card-title">Pengeluaran Per Kategori</div>
+                <div class="card-subtitle">Visualisasi kontribusi anggaran setiap kategori</div>
+              </div>
+              <span class="card-badge">Horizontal Bar Chart</span>
+            </div>
+            <div class="chart-container">
+              <canvas id="categoryChart"></canvas>
+            </div>
+            <div class="card-footer">
+              <span>Google Sheets Engine:</span>
+              <span>Chart Insert > Bar Chart (Grouped by Category)</span>
+            </div>
+          </div>
+
+          <div class="card animate-in">
+            <div class="card-header">
+              <div>
+                <div class="card-title">Riwayat Terakhir</div>
+                <div class="card-subtitle" id="recentSubtitle">Menampilkan 5 aktivitas belanja terbaru</div>
+              </div>
+              <span class="card-badge live">Live QUERY</span>
+            </div>
+            <div class="recent-list" id="recentList">
+              <!-- Rendered by JS -->
+            </div>
+            <div class="card-footer">
+              <span>Google Sheets Formula:</span>
+              <span>=QUERY(DATA!A:E; "select A, B, C...</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Cashflow Statement -->
+        <div class="cashflow-section animate-in">
+          <div class="card" style="border: none; box-shadow: none; background: transparent; padding: 0;">
+            <div class="cashflow-title">Arus Kas Ringkas (Cashflow Statement)</div>
+            <div class="cashflow-subtitle">Perbandingan total pemasukan dan pengeluaran</div>
+            <div class="cashflow-cards" id="cashflowCards">
+              <!-- Rendered by JS -->
+            </div>
+          </div>
+        </div>
+
+      </section>
+
+      <!-- ── Data (Transactions) View ──────────────────── -->
+      <section class="view" id="viewData">
+        <div class="card animate-in" style="margin-top: 24px; padding: 0;">
+          <div class="page-header">
+            <div>
+              <div class="page-title">Sheet: DATA (Transaksi)</div>
+              <div class="page-subtitle">Seluruh data transaksi mentah disimpan dan dikelola pada tabel di bawah ini.</div>
+            </div>
+            <div class="page-actions">
+              <input type="text" class="search-input" id="searchTransactions" placeholder="Cari transaksi...">
+              <button class="btn-new" id="btnNewTransaction">
+                + Baru
+              </button>
+            </div>
+          </div>
+          <div class="data-table-wrapper">
+            <table class="data-table" id="transactionsTable">
+              <thead>
+                <tr>
+                  <th>Tanggal</th>
+                  <th>Nama Transaksi</th>
+                  <th>Kategori</th>
+                  <th style="text-align:right">Nominal</th>
+                  <th style="text-align:center">Jenis</th>
+                  <th style="text-align:center">Aksi</th>
+                </tr>
+              </thead>
+              <tbody id="transactionsBody">
+                <!-- Rendered by JS -->
+              </tbody>
+            </table>
+          </div>
+          <div class="data-footer" id="dataFooter">
+            <!-- Rendered by JS -->
+          </div>
+        </div>
+      </section>
+
+      <!-- ── Category View ─────────────────────────────── -->
+      <section class="view" id="viewCategory">
+        <div class="category-layout">
+          <!-- Form -->
+          <div class="category-form-card animate-in">
+            <div class="category-form-title">Tambah Kategori Baru</div>
+            <div class="category-form-subtitle">Tambahkan opsi pemetaan kategori untuk form data validation.</div>
+
+            <label class="form-label">Nama Kategori</label>
+            <input type="text" class="form-input" id="categoryNameInput" placeholder="Contoh: Hiburan, Kesehatan, dll.">
+
+            <label class="form-label" style="margin-top: 18px;">Warna Label</label>
+            <div class="color-picker" id="colorPicker">
+              <!-- Rendered by JS -->
+            </div>
+
+            <button class="btn-save-category" id="btnSaveCategory">Simpan Kategori</button>
+          </div>
+
+          <!-- Table -->
+          <div class="category-table-card animate-in">
+            <div class="category-table-header">
+              <div>
+                <div class="category-table-header-title">Sheet: KATEGORI (Mapping)</div>
+                <div class="category-table-header-subtitle">Daftar kategori yang divalidasi dan digunakan untuk pengelompokan data.</div>
+              </div>
+              <button class="btn-validation-rules" id="btnValidationRules">Validation Rules</button>
+            </div>
+            <table class="category-table" id="categoryTable">
+              <thead>
+                <tr>
+                  <th>Nama Kategori</th>
+                  <th>Sandi Warna</th>
+                  <th style="text-align:center">Aksi</th>
+                </tr>
+              </thead>
+              <tbody id="categoryBody">
+                <!-- Rendered by JS -->
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </section>
+
+    </main>
+
+    <!-- ══ Footer ══════════════════════════════════════════ -->
+    <footer class="app-footer" id="appFooter">
+      <div class="footer-inner">
+        <div class="footer-right">
+          <div class="footer-credit">
+            Dibuat oleh <strong>Rahardyan</strong>
+          </div>
+          <div class="footer-year">© <span id="footerYear"></span> All rights reserved.</div>
+        </div>
+      </div>
+    </footer>
+
+    <!-- ══ Transaction Modal ═════════════════════════════ -->
+    <div class="modal-overlay" id="transactionModal">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h2 class="modal-title" id="modalTitle">Tambah Transaksi</h2>
+          <button class="btn-modal-close" id="btnCloseModal">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <line x1="18" y1="6" x2="6" y2="18"></line>
+              <line x1="6" y1="6" x2="18" y2="18"></line>
+            </svg>
+          </button>
+        </div>
+        <form id="transactionForm">
+          <div class="form-row">
+            <div class="form-group">
+              <label for="txnDate">Tanggal</label>
+              <input type="date" id="txnDate" required>
+            </div>
+            <div class="form-group">
+              <label for="txnCategory">Kategori</label>
+              <select id="txnCategory" required>
+                <option value="">Pilih Kategori</option>
+              </select>
+            </div>
+          </div>
+          <div class="form-group">
+            <label for="txnName">Nama Transaksi</label>
+            <input type="text" id="txnName" placeholder="Contoh: Belanja bulanan" required>
+          </div>
+          <div class="form-group">
+            <label for="txnAmount">Nominal (Rp)</label>
+            <input type="number" id="txnAmount" placeholder="0" min="0" required>
+          </div>
+          <div class="form-group">
+            <label>Jenis Transaksi</label>
+            <div class="type-toggle" id="typeToggle">
+              <button type="button" class="type-toggle-btn expense active" data-type="expense">Expense</button>
+              <button type="button" class="type-toggle-btn income" data-type="income">Income</button>
+            </div>
+          </div>
+
+          <!-- Google Sheets Config -->
+          <div class="sheets-config">
+            <div class="sheets-config-title">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+                <polyline points="14 2 14 8 20 8"></polyline>
+              </svg>
+              Google Sheets Sync
+            </div>
+            <input type="url" class="form-input" id="sheetsUrl" placeholder="Paste Google Apps Script Web App URL...">
+            <button type="button" class="btn-export" id="btnExportSheets">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width:16px;height:16px">
+                <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+                <polyline points="17 8 12 3 7 8"></polyline>
+                <line x1="12" y1="3" x2="12" y2="15"></line>
+              </svg>
+              Export Semua Data ke Google Sheets
+            </button>
+          </div>
+
+          <button type="submit" class="btn-save-transaction">Simpan Transaksi</button>
+        </form>
+      </div>
+    </div>
+
+    <!-- ══ Toast ══════════════════════════════════════════ -->
+    <div class="toast" id="toast"></div>
+
+  </div>
+
+  <!-- Scripts -->
+  <script src="js/utils.js"></script>
+  <script src="js/store.js"></script>
+  <script src="js/charts.js"></script>
+  <script src="js/modal.js"></script>
+  <script src="js/dashboard.js"></script>
+  <script src="js/transactions.js"></script>
+  <script src="js/categories.js"></script>
+  <script src="js/sheets.js"></script>
+  <script src="js/app.js"></script>
+</body>
+</html>
